@@ -29,6 +29,7 @@ gem 'yournavigation'
 gem 'rosemary', :git => 'git://github.com/sozialhelden/rosemary'
 gem 'openlayers-rails'
 gem 'pry-byebug'
+gem 'nominatim'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
