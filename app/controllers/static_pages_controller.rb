@@ -5,16 +5,27 @@ class StaticPagesController < ApplicationController
  def resp
  	#from = [38.5815719, -121.4943996] # Sacramento, US
 	#to   = [37.3393857, -121.8949555] # San Jose, US
-  puts 1
-  from = Nominatim.search(params[:from]).limit(10).address_details(true).first
-  puts 2
-  to = Nominatim.search(params[:to]).limit(10).address_details(true).first
+  markers = []
+  distance = 0
+  traveltime = 0
+  coordinates = []
 
- 	from = [from.lat, from.lon]
-	to   = [to.lat, to.lon]
- 	@response = Yournavigation.gosmore from, to
-  puts 3
- 	render json: @response
+  params[:tmp].each do |t|
+    tmp = Nominatim.search(t).limit(10).address_details(true).first
+    puts t
+    markers << [tmp.lat, tmp.lon]
+  end
+
+  markers.each_with_index do |t, index|
+    unless index == markers.length() - 1
+      response = Yournavigation.gosmore t, markers[index + 1]
+      distance += response.distance
+      traveltime += response.traveltime
+      response.coordinates.each { |t| coordinates << t}
+    end
+  end
+
+ 	render json: [distance: distance, coordinates: coordinates, traveltime: traveltime, markers: markers]
  end
 
 end

@@ -10,19 +10,35 @@ ready = ->
   map.addLayer markers
    
   map.zoomToMaxExtent();
+  id_num = 0
   $("#show_route").click ->
+    tmp = []
+    tmp.push($("#from").val())
+    if id_num > 0
+      for i in [0..id_num - 1]
+        tmp.push($("#" + i).val())
+    tmp.push($("#to").val())
     $.ajax
       type: "GET"
       url: "/static_pages/resp"
       data: { 
         "from": $("#from").val(),
         "to": $("#to").val(),
+        "tmp": tmp
       }
       success: (data) ->
-        $("#dyst").text(data.distance)
-        $("#time").text(data.traveltime)
-        $("#desc").text(data.description)
-        drawRoute(data.coordinates, map, markers)
+        $("#dyst").text(data[0].distance)
+        $("#time").text(data[0].traveltime)
+        drawRoute(data[0].coordinates, data[0].markers, map, markers)
+  wrapper = $(".input_wrapper")
+  add_button = $("#add_point")
+  $("#add_point").click ->
+    $(wrapper).append('<div><input type="text" name="mytext[]" id="' + id_num + '"/><a href="#" class="remove_field">Remove</a></div>')
+    id_num++
+  $(wrapper).on("click",".remove_field", (e) ->
+    e.preventDefault()
+    $(this).parent('div').remove()
+  )
  
 
 
@@ -36,12 +52,6 @@ selectedStyle =
   strokeOpacity: 0.5
   strokeWidth: 5
 
-markerStyle = 
-  externalGraphic: 'http://simpleicon.com/wp-content/uploads/map-marker-13.png' 
-  graphicHeight: 25
-  graphicWidth: 21 
-  graphicXOffset:-12
-  graphicYOffset:-25
 
 colorRoute = (layer) ->
   for feature in layer.features
@@ -53,7 +63,7 @@ colorRoute = (layer) ->
   layer.redraw()
 
 getPos = (coordinates, map) ->
-  new OpenLayers.LonLat(coordinates[0], coordinates[1]) .transform(
+  new OpenLayers.LonLat(coordinates[1], coordinates[0]) .transform(
     new OpenLayers.Projection("EPSG:4326"),
     map.getProjectionObject()
   )
@@ -81,7 +91,7 @@ listeners =
 
     this.redraw()
 
-drawRoute = (coordinates, map, markers) ->
+drawRoute = (coordinates, markersPos, map, markers) ->
   lineLayer = new OpenLayers.Layer.Vector("Line Layer", eventListeners: OpenLayers.Util.extend({scope: lineLayer}, listeners))
   map.addLayer lineLayer
   map.addControl new OpenLayers.Control.DrawFeature(lineLayer, OpenLayers.Handler.Path)
@@ -93,17 +103,16 @@ drawRoute = (coordinates, map, markers) ->
   lineFeature = new OpenLayers.Feature.Vector(line, null, style)
   lineLayer.addFeatures [lineFeature]
 
-  drawMarkers(coordinates[0], coordinates[coordinates.length - 1], lineLayer, map, markers)
+  drawMarkers(markersPos, lineLayer, map, markers)
 
   map.zoomToExtent(lineLayer.getDataExtent())
 
-drawMarkers = (start, end, layer, map, markers) ->
-  posStart = getPos(start, map)
-  posEnd = getPos(end, map)
-  addMarker(posStart, markers, layer, map)
-  addMarker(posEnd, markers, layer, map)
-  map.raiseLayer(markers, map.layers.length);
-
+drawMarkers = (markersPos, layer, map, markers) ->
+  console.log(markersPos)
+  for i in [0..markersPos.length - 1]
+    pos = getPos(markersPos[i], map)
+    addMarker(pos, markers, layer, map)
+  map.raiseLayer(markers, map.layers.length)
 
      
 $(document).ready(ready);
