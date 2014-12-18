@@ -27,6 +27,9 @@ ready = ->
         "tmp": tmp
       }
       success: (data) ->
+        if data[0].error
+          alert(data[0].error)
+          return
         $("#dyst").text(data[0].distance)
         $("#time").text(data[0].traveltime)
         drawRoute(data[0].coordinates, data[0].markers, map, markers)

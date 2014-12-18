@@ -12,7 +12,10 @@ class StaticPagesController < ApplicationController
 
   params[:tmp].each do |t|
     tmp = Nominatim.search(t).limit(10).address_details(true).first
-    puts t
+    unless tmp 
+      render json: [error: t + ": podany adres nie istnieje"]
+      return
+    end
     markers << [tmp.lat, tmp.lon]
   end
 
