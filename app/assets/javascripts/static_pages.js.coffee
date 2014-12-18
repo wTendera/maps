@@ -66,7 +66,7 @@ colorRoute = (layer) ->
   layer.redraw()
 
 getPos = (coordinates, map) ->
-  new OpenLayers.LonLat(coordinates[1], coordinates[0]) .transform(
+  new OpenLayers.LonLat(coordinates[1], coordinates[0]).transform(
     new OpenLayers.Projection("EPSG:4326"),
     map.getProjectionObject()
   )
@@ -112,8 +112,8 @@ drawRoute = (coordinates, markersPos, map, markers) ->
 
 drawMarkers = (markersPos, layer, map, markers) ->
   console.log(markersPos)
-  for i in [0..markersPos.length - 1]
-    pos = getPos(markersPos[i], map)
+  for el in markersPos
+    pos = getPos(el, map)
     addMarker(pos, markers, layer, map)
   map.raiseLayer(markers, map.layers.length)
 

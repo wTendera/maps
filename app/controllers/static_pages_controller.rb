@@ -3,8 +3,6 @@ class StaticPagesController < ApplicationController
  end
 
  def resp
- 	#from = [38.5815719, -121.4943996] # Sacramento, US
-	#to   = [37.3393857, -121.8949555] # San Jose, US
   markers = []
   distance = 0
   traveltime = 0
